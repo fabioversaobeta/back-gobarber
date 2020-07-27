@@ -1,9 +1,11 @@
-import { startOfHour, isBefore, getHours } from 'date-fns';
+import { startOfHour, isBefore, getHours, format } from 'date-fns';
 import { injectable, inject } from 'tsyringe';
 
 import Appointment from '@modules/appointments/infra/typeorm/entities/Appointment';
 import AppointmentsRepository from '@modules/appointments/infra/typeorm/repositories/AppointmentsRepository';
 import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
+
+import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
 
 import AppError from '@shared/errors/AppError';
 
@@ -18,6 +20,9 @@ class CreateAppointmentService {
     constructor(
         @inject('AppointmentsRepository')
         private appointmentsRepository: IAppointmentsRepository,
+
+        @inject('NotificationsRepository')
+        private notificationsRepository: INotificationsRepository,
     ) {}
 
     public async execute({ 
@@ -45,16 +50,23 @@ class CreateAppointmentService {
             await this.appointmentsRepository.findByDate(appointmentDate);
 
         if (findAppointmentInSameDate) {
-            throw new AppError("This appointment is already booked")
+            throw new AppError("This appointment is already booked");
         }
 
         const appointment = await this.appointmentsRepository.create({
             provider_id,
             user_id,
             date: appointmentDate
-        })
+        });
 
-        return appointment
+        const dateFormatted = format(appointmentDate, "dd/MM/yyyy 'às' HH:mm");
+
+        await this.notificationsRepository.create({
+            recipient_id: provider_id,
+            content: `Novo agendamento para dia ${dateFormatted}`,
+        });
+
+        return appointment;
     }
 }
 
