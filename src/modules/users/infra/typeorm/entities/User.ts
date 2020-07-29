@@ -42,9 +42,6 @@ class User {
             default:
                 return null;
         }
-        return this.avatar
-            
-            : null;
     }
 }
 

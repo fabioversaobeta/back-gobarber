@@ -2,24 +2,20 @@ import AppError from '@shared/errors/AppError';
 
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import CreateUserService from './CreateUserService';
+import FakeCacheProvider from '@shared/container/providers/CacheProvider/fakes/FakeCacheProvider';
 import AuthenticateUserService from './AuthenticateUserService';
 
 let fakeUsersRepository: FakeUsersRepository;
 let fakeHashProvider: FakeHashProvider;
-let createUser: CreateUserService;
+let fakeCacheProvider: FakeCacheProvider;
 let authenticateUser: AuthenticateUserService;
 
 describe('AuthenticateUser', () => {
     beforeEach(() => {
         fakeUsersRepository = new FakeUsersRepository();
         fakeHashProvider = new FakeHashProvider();
+        fakeCacheProvider = new FakeCacheProvider();
         
-        createUser = new CreateUserService(
-            fakeUsersRepository,
-            fakeHashProvider,
-        );
-
         authenticateUser = new AuthenticateUserService(
             fakeUsersRepository,
             fakeHashProvider
@@ -27,7 +23,7 @@ describe('AuthenticateUser', () => {
     });
     
     it('should be able to Authenticate', async () => {
-        const user = await createUser.execute({
+        const user = await fakeUsersRepository.create({
             name: 'Jhon Doe',
             email: 'jhondoe@example.com',
             password: '123456',
@@ -52,7 +48,7 @@ describe('AuthenticateUser', () => {
     });
 
     it('should not be able to Authenticate with non existing user', async () => {
-        await createUser.execute({
+        await fakeUsersRepository.create({
             name: 'Jhon Doe',
             email: 'jhondoe@example.com',
             password: '123456',
