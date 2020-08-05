@@ -49,4 +49,4 @@ class S3StorageProvider implements IStorageProvider {
     }
 }
 
-export default DiskStorageProvider;
+export default S3StorageProvider;
